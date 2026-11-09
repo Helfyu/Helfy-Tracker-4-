@@ -25,6 +25,9 @@ jobs:
           cp index.html sw.js manifest.json icon.png www/
           npm init -y
           npm i @capacitor/core@6 @capacitor/cli@6 @capacitor/android@6
+          npm i maplibre-gl@4.7.1
+          cp node_modules/maplibre-gl/dist/maplibre-gl.js node_modules/maplibre-gl/dist/maplibre-gl.css www/
+          sed -i 's#https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/#./#g' www/index.html www/sw.js
           npx cap init "Helfy Tracker" com.helfy.tracker --web-dir www
           npx cap add android
           sed -i 's#<uses-permission android:name="android.permission.INTERNET" />#&\n<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />\n<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />#' android/app/src/main/AndroidManifest.xml
@@ -39,7 +42,8 @@ jobs:
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug
+          sed -i 's/networkTimeout=10000/networkTimeout=120000/' gradle/wrapper/gradle-wrapper.properties
+          for i in 1 2 3; do ./gradlew assembleDebug && break; if [ $i = 3 ]; then exit 1; fi; sleep 15; done
       - name: Rename APK
         run: cp android/app/build/outputs/apk/debug/app-debug.apk HelfyTracker.apk
       - uses: softprops/action-gh-release@v2
