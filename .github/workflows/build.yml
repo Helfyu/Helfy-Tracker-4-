@@ -19,6 +19,8 @@ jobs:
           java-version: 17
       - name: Prepare app
         run: |
+          sudo apt-get update
+          sudo apt-get install -y imagemagick
           mkdir www
           cp index.html sw.js manifest.json icon.png www/
           npm init -y
